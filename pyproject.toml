@@ -12,7 +12,7 @@ dependencies = [
 [project.optional-dependencies]
 # P5: every layer independently deployable and independently killable.
 # The gateway must not need the harness; the harness must not need GCP.
-gateway = ["mcp>=1.9"]
+gateway = ["mcp>=1.28.1"]
 # Pinned, not floated: Section 7.1 treats the harness as a scheduling
 # decision, not an incident. Bump deliberately at a quarterly review.
 harness = ["deepagents==0.6.12", "langchain-mcp-adapters>=0.3"]
