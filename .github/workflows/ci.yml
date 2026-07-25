@@ -36,10 +36,10 @@ jobs:
           python -m pip install -e '.[gateway,harness,dev]'
 
       - name: Lint
-        run: python -m ruff check src tests
+        run: python -m ruff check src tests scripts
 
       - name: Format check
-        run: python -m ruff format --check src tests
+        run: python -m ruff format --check src tests scripts
 
       - name: Test
         # No credentials and no network are configured for this job on purpose:
@@ -93,18 +93,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
       - name: No banned constructions
-        # §3.4 names these because they fail silently and look identical to the
-        # correct choice. Grep is a blunt instrument and exactly right here.
-        run: |
-          set -e
-          if grep -rn "ContextHubBackend(" src/; then
-            echo "::error::§3.4 bans ContextHubBackend (vendor-hosted memory)"; exit 1
-          fi
-          if grep -rnE "StoreBackend\((\s*\)|[^)]*store\s*=\s*None)" src/; then
-            echo "::error::§3.4 bans StoreBackend without an explicit store="; exit 1
-          fi
-          echo "ok: no banned constructions"
+        # AST, not grep: this repository documents the banned patterns by name,
+        # and a text search cannot tell a call site from the paragraph
+        # explaining why that call site is forbidden.
+        run: python scripts/check_portability_contract.py --github
 
       - name: Committed config is path-independent
         # An absolute path from one machine breaks every other clone.
