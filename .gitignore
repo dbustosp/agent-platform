@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.env
+# Local evidence output (EVIDENCE_PATH / EVIDENCE_SPILL_PATH default to
+# ./evidence/). Anchored to the repository root on purpose: unanchored,
+# `evidence/` also matches src/agent_platform/evidence/, which silently
+# untracks the entire evidence package and hides it from `ruff check src`.
+/evidence/
+*.egg-info/
+dist/
+build/

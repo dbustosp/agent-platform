@@ -1,0 +1,45 @@
+[project]
+name = "agent-platform"
+version = "0.1.0"
+description = "Governed context and evidence gateway for agents — harness-agnostic control plane"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.7",
+    "PyYAML>=6.0",
+    "typer>=0.12",
+]
+
+[project.optional-dependencies]
+# P5: every layer independently deployable and independently killable.
+# The gateway must not need the harness; the harness must not need GCP.
+gateway = ["mcp>=1.9"]
+# Pinned, not floated: Section 7.1 treats the harness as a scheduling
+# decision, not an incident. Bump deliberately at a quarterly review.
+harness = ["deepagents==0.6.12", "langchain-mcp-adapters>=0.3"]
+gcp = ["google-cloud-bigquery>=3.25", "langchain-google-vertexai>=2.0"]
+dev = ["pytest>=8.2", "pytest-asyncio>=0.23", "ruff>=0.5"]
+
+[project.scripts]
+agent-platform = "agent_platform.cli:app"
+# Separate console script rather than a subcommand: Claude Code invokes this on
+# every tool call, so it must start fast and print nothing.
+agent-platform-hook = "agent_platform.claude_code.hook:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agent_platform"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
