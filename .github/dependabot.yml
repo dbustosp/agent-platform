@@ -1,0 +1,18 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      dev-tooling:
+        patterns: ["pytest*", "ruff", "pre-commit"]
+    ignore:
+      # Section 7.1: the harness is pinned deliberately. A breaking release is a
+      # scheduling decision at the quarterly review, not an automated PR.
+      - dependency-name: deepagents
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly

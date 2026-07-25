@@ -1,0 +1,11 @@
+# Default owner for everything.
+*                                   @dbustosp
+
+# The pieces Section 6 calls non-negotiable and Section 3.4 calls banned-by-name
+# get an explicit entry so a change to them is never a silent approval.
+/src/agent_platform/evidence/       @dbustosp
+/src/agent_platform/policy.py       @dbustosp
+/src/agent_platform/harness/backends.py  @dbustosp
+/docs/evidence-schema.md            @dbustosp
+/docs/portability-contract.md       @dbustosp
+/.github/workflows/                 @dbustosp
