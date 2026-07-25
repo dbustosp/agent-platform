@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "agent-platform-hook",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

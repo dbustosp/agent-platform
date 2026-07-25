@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "agent-platform-gateway": {
+      "command": "agent-platform",
+      "args": [
+        "gateway",
+        "serve"
+      ]
+    }
+  }
+}
