@@ -1,0 +1,81 @@
+# Prior assertions, each traceable to where it came from.
+#
+# `source` is mandatory. An assertion an agent cannot trace back to an incident,
+# a review or a decision record is a rumour, and the gateway should not launder
+# rumours into a model's context. `recall` returns these newest first.
+
+assertions:
+  - subject: checkout-api
+    statement: >-
+      Authorisation latency budget is 250 ms p99 end to end. Anything added to
+      the synchronous path has to come out of that budget, not on top of it.
+    source: ADR-0114 "Checkout latency budget"
+    recorded_at: 2026-06-02
+    confidence: high
+
+  - subject: checkout-api
+    statement: >-
+      Cardholder data must not leave the boundary, which is why this service is
+      the Phase 0 use case: Copilot's cloud agent structurally cannot work here.
+    source: Phase 0 use-case selection note
+    recorded_at: 2026-07-11
+    confidence: high
+
+  - subject: checkout-api
+    statement: >-
+      INC-2291: a synchronous consent lookup added to the authorisation path
+      caused a 40-minute partial outage. Consent state is now read from a local
+      cache with a 5-minute TTL.
+    source: INC-2291 postmortem
+    recorded_at: 2026-05-14
+    confidence: high
+
+  - subject: ledger-service
+    statement: >-
+      Corrections are compensating entries. There is no code path that updates a
+      settled row, and a proposed change that needs one is a design error rather
+      than a migration.
+    source: ADR-0071 "Append-only ledger"
+    recorded_at: 2025-11-20
+    confidence: high
+
+  - subject: fraud-scoring
+    statement: >-
+      The served model contributes to a decision about a person, so every
+      promotion is a model-deployment change class and needs a model register
+      entry (CTL-ML-009).
+    source: AI governance review, 2026-04
+    recorded_at: 2026-04-08
+    confidence: high
+
+  - subject: fraud-scoring
+    statement: >-
+      Shadow traffic runs for a minimum of seven days before any live
+      percentage, because the fraud signal is weekly-seasonal.
+    source: Risk engineering runbook RB-014
+    recorded_at: 2026-01-30
+    confidence: medium
+
+  - subject: customer-profile
+    statement: >-
+      Consent state is read on the authorisation path. Latency regressions here
+      surface as checkout incidents, not as profile incidents.
+    source: INC-2291 postmortem
+    recorded_at: 2026-05-14
+    confidence: high
+
+  - subject: reporting-etl
+    statement: >-
+      Reads from replicas only. A reporting query against a primary is treated
+      as an incident regardless of whether it caused one.
+    source: Data platform operating standard DP-OPS-3
+    recorded_at: 2025-09-16
+    confidence: medium
+
+  - subject: evidence-log
+    statement: >-
+      Evidence rows are written at the point of action and hashed, not stored as
+      payloads. A tracing export is a copy and is never the record.
+    source: PLAN.md Section 6
+    recorded_at: 2026-07-25
+    confidence: high

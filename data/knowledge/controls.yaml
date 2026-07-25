@@ -1,0 +1,141 @@
+# Controls applicable to a class of change.
+#
+# Keyed by change class rather than by service on purpose: an agent knows what
+# kind of change it is about to describe long before it knows which control
+# regime that lands it in. Asking "what kind of change is this?" is a question a
+# model can answer; "which of our standards apply?" is not.
+
+change_classes:
+  - change_class: schema-migration
+    aliases: [database-migration, db-migration, ddl-change]
+    description: >-
+      Any DDL change to a persistent store backing a running service, including
+      additive columns.
+    controls:
+      - control_id: CTL-DB-001
+        title: Backward-compatible migration plan
+        standard: ENG-STD-004
+        requirement: >-
+          Expand/contract in separate deploys. The schema must remain readable
+          by the previously deployed application version until that version is
+          fully drained.
+        evidence: Migration plan linked in the change ticket, naming both deploys.
+      - control_id: CTL-DB-002
+        title: Reversal path
+        standard: ENG-STD-004
+        requirement: >-
+          A tested down-migration, or a written statement of why reversal is
+          impossible and what the forward fix is instead.
+        evidence: Down-migration executed against a restored snapshot.
+      - control_id: CTL-DB-007
+        title: Tier-1 change window
+        standard: OPS-STD-002
+        requirement: >-
+          Migrations against a tier-1 store run inside an approved window with
+          the owning team on call.
+        evidence: Approved change record referencing the window.
+
+  - change_class: model-deployment
+    aliases: [model-release, model-change, ml-deployment]
+    description: >-
+      Promoting a new model version behind a served endpoint, including a
+      retrain of an existing architecture.
+    controls:
+      - control_id: CTL-ML-001
+        title: Offline evaluation against the current champion
+        standard: ML-STD-001
+        requirement: >-
+          Report the agreed metrics for challenger and champion on the same
+          holdout, including slice metrics for protected characteristics.
+        evidence: Evaluation run id and the metric table.
+      - control_id: CTL-ML-004
+        title: Staged rollout with automatic rollback
+        standard: ML-STD-001
+        requirement: >-
+          Shadow, then a bounded traffic percentage, with a pre-declared
+          rollback trigger wired before the first real request.
+        evidence: Rollout configuration and the trigger definition.
+      - control_id: CTL-ML-009
+        title: Decision-affecting model register entry
+        standard: AI-GOV-002
+        requirement: >-
+          A model that contributes to a decision about a person is registered
+          with its purpose, owner and human-review route before it serves
+          traffic.
+        evidence: Model register entry id.
+
+  - change_class: iam-policy-change
+    aliases: [iam-change, permissions-change, access-change]
+    description: >-
+      Any change to roles, bindings or service-account permissions in a
+      production project.
+    controls:
+      - control_id: CTL-IAM-001
+        title: Least privilege, stated
+        standard: SEC-STD-003
+        requirement: >-
+          Name the specific permissions required and why. Basic roles
+          (owner/editor/viewer) are refused on production projects.
+        evidence: Diff of the binding plus the justification in the ticket.
+      - control_id: CTL-IAM-003
+        title: Second-person approval
+        standard: SEC-STD-003
+        requirement: >-
+          Approved by someone other than the requester, from the owning team.
+        evidence: Approval record with the approver's identity.
+      - control_id: CTL-IAM-006
+        title: Non-human identity has an owner and an expiry
+        standard: SEC-STD-011
+        requirement: >-
+          Every service account or agent principal names a human owner and a
+          review date. Unowned identities are revoked at review.
+        evidence: Identity register entry.
+
+  - change_class: third-party-data-egress
+    aliases: [data-egress, vendor-integration, external-transfer]
+    description: >-
+      Sending internal data to any system outside our cloud boundary, including
+      SaaS tooling and vendor APIs.
+    controls:
+      - control_id: CTL-DATA-002
+        title: Classification and lawful basis
+        standard: DATA-STD-001
+        requirement: >-
+          Classify the data leaving and record the lawful basis. PCI and
+          special-category data do not leave the boundary under this class of
+          change at all.
+        evidence: Data-flow record with classification and basis.
+      - control_id: CTL-DATA-005
+        title: Processor agreement in place
+        standard: DATA-STD-001
+        requirement: >-
+          A current processor agreement covering the categories being sent, with
+          transfer mechanism recorded for non-EEA destinations.
+        evidence: Contract reference and effective date.
+      - control_id: CTL-DATA-008
+        title: Minimisation at the boundary
+        standard: DATA-STD-004
+        requirement: >-
+          Send fields required for the stated purpose only. Whole-record exports
+          need a written exception.
+        evidence: Field list in the data-flow record.
+
+  - change_class: dependency-upgrade
+    aliases: [library-upgrade, package-bump, dependency-bump]
+    description: >-
+      Upgrading a third-party library or base image in a deployed service.
+    controls:
+      - control_id: CTL-SUP-001
+        title: Provenance and pinning
+        standard: SEC-STD-008
+        requirement: >-
+          Resolve from the internal registry at a pinned version or digest.
+          Floating tags are refused on tier-1 and tier-2 services.
+        evidence: Lockfile diff showing the pinned version.
+      - control_id: CTL-SUP-004
+        title: Licence check
+        standard: LEG-STD-002
+        requirement: >-
+          New or changed licences are checked against the approved list before
+          merge. Copyleft in a distributed artefact needs Legal sign-off.
+        evidence: Licence scan result attached to the pull request.

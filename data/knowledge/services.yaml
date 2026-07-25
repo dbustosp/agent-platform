@@ -1,0 +1,89 @@
+# Sample service context for the Phase 1 pilot.
+#
+# Git is the system of record (§3.3). Phase 3 replaces this file with a
+# knowledge graph behind the same three gateway lookups; nothing about the tool
+# surface changes when it does.
+#
+# `aliases` exist because models say "checkout" when they mean "checkout-api".
+# An alias is cheaper than a failed lookup and a retry.
+
+services:
+  - name: checkout-api
+    aliases: [checkout, checkout api, checkout-service]
+    owner_team: payments-platform
+    owner_contact: "#payments-platform"
+    tier: tier-1
+    criticality: critical
+    repo: github.com/acme-internal/checkout-api
+    data_classification: pci
+    description: >-
+      Public-facing checkout and payment authorisation. Carries cardholder data,
+      so it sits inside PCI scope and cannot be worked on by any agent whose
+      execution leaves our boundary.
+    dependencies:
+      - ledger-service
+      - fraud-scoring
+      - customer-profile
+      - postgres-checkout
+
+  - name: ledger-service
+    aliases: [ledger, general-ledger]
+    owner_team: payments-platform
+    owner_contact: "#payments-platform"
+    tier: tier-1
+    criticality: critical
+    repo: github.com/acme-internal/ledger-service
+    data_classification: financial-records
+    description: >-
+      Double-entry ledger and system of record for settled transactions.
+      Append-only; corrections are compensating entries, never updates.
+    dependencies:
+      - postgres-ledger
+      - kafka-settlement
+
+  - name: fraud-scoring
+    aliases: [fraud, fraud-scorer, risk-scoring]
+    owner_team: risk-engineering
+    owner_contact: "#risk-eng"
+    tier: tier-2
+    criticality: high
+    repo: github.com/acme-internal/fraud-scoring
+    data_classification: pii
+    description: >-
+      Online risk scoring for authorisation decisions. Model-backed, so changes
+      to the served model are a model-deployment change class, not a code one.
+    dependencies:
+      - customer-profile
+      - feature-store
+      - vertex-endpoint-fraud-v4
+
+  - name: customer-profile
+    aliases: [profile, customer-profile-api, profiles]
+    owner_team: customer-data
+    owner_contact: "#customer-data"
+    tier: tier-2
+    criticality: high
+    repo: github.com/acme-internal/customer-profile
+    data_classification: pii
+    description: >-
+      Canonical customer identity and consent state. Consent lookups are on the
+      authorisation path, so latency regressions here become checkout incidents.
+    dependencies:
+      - postgres-profile
+      - consent-registry
+
+  - name: reporting-etl
+    aliases: [reporting, etl, analytics-etl]
+    owner_team: data-platform
+    owner_contact: "#data-platform"
+    tier: tier-3
+    criticality: medium
+    repo: github.com/acme-internal/reporting-etl
+    data_classification: internal
+    description: >-
+      Nightly batch load from operational stores into the reporting warehouse.
+      Not on any customer path; a failed run is a next-morning problem.
+    dependencies:
+      - postgres-ledger
+      - postgres-profile
+      - bigquery-reporting
