@@ -16,7 +16,7 @@ gateway = ["mcp>=1.9"]
 # Pinned, not floated: Section 7.1 treats the harness as a scheduling
 # decision, not an incident. Bump deliberately at a quarterly review.
 harness = ["deepagents==0.6.12", "langchain-mcp-adapters>=0.3"]
-gcp = ["google-cloud-bigquery>=3.25", "langchain-google-vertexai>=2.0"]
+gcp = ["google-cloud-bigquery>=3.42.2", "langchain-google-vertexai>=2.0"]
 dev = ["pytest>=8.2", "pytest-asyncio>=0.23", "ruff>=0.5"]
 
 [project.scripts]
